@@ -27,7 +27,7 @@ class BayesianNetwork(DAG):
     Base class for Bayesian Models.
     """
 
-    def __init__(self, ebunch=None, latents=set()):
+    def __init__(self, ebunch=None, latents=set(), show_progress=True):
         """
         Initializes a Bayesian Model.
         A models stores nodes and edges with conditional probability
@@ -98,6 +98,7 @@ class BayesianNetwork(DAG):
         super(BayesianNetwork, self).__init__(ebunch=ebunch, latents=latents)
         self.cpds = []
         self.cardinalities = defaultdict(int)
+        self.show_progress = show_progress
 
     def add_edge(self, u, v, **kwargs):
         """
@@ -738,10 +739,11 @@ class BayesianNetwork(DAG):
                     show_progress=False,
                 )
                 for index, data_point in tqdm(
-                    data_unique.iterrows(), total=data_unique.shape[0]
+                    data_unique.iterrows(),
+                    total=data_unique.shape[0],
+                    disable=not self.show_progress,
                 )
             )
-
             df_results = pd.DataFrame(pred_values, index=data_unique.index)
             data_with_results = pd.concat([data_unique, df_results], axis=1)
             return data.merge(data_with_results, how="left").loc[
